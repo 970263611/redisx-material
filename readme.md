@@ -1,5 +1,7 @@
 # Redis-x
 
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
+
 ## 作者
 
 丁伟强、常东亮、张慧豪、张书涵
@@ -1548,3 +1550,5 @@ psync：增量复制，指的是从节点可以根据主节点编号和指定偏
 repl-backlog-size  #环形缓冲复制队列大小，可不带单位，但同时支持单位：b、k、kb、m、mb、g、gb
 repl-backlog-ttl   #环形缓冲复制队列存活时长（所有slaves不可用时，保留repl_backlog多长时间，单位：秒）
 ```
+
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
