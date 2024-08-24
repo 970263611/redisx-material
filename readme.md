@@ -6,7 +6,7 @@
 
 丁伟强、常东亮、张慧豪、张书涵
 
-https://github.com/970263611/redis-x
+https://github.com/970263611/redisx
 
 ## 基础概念
 
