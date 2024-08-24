@@ -1,10 +1,10 @@
-# Redis-x
+# Redisx
 
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
 ## 作者
 
-丁伟强、常东亮、张慧豪、张书涵
+丁伟强、常东亮、张慧豪、张书涵、陈裕、马明
 
 https://github.com/970263611/redisx
 
