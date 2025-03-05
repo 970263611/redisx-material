@@ -1153,19 +1153,105 @@ f2  00  80  00  04  81  61  02  83  e7  94  b7  04  ff：见LISTPACK结构解析
 key为'name'，value为'zzh'
 ```
 
-<u>24.对象类型-STREAM\_LISTPACKS</u>
+<u>24.对象类型-HASH_LISTPACK_EX</u>
+
+类型描述：
+
+用于存储redis中HASH字段过期数据。与HASH_LISTPACK不同的是，在HASH_LISTPACK_EX中,LISTPACK结构每三个元素(key, value, ttl )为一组 ，而在HASH_LISTPACK中LISTPACK结构每两个元素（key, value）为一组 
+
+结构图表：
+
+| HASH\_LISTPACK_EX | ttl                   | len                | content            |
+| ----------------- | --------------------- | ------------------ | ------------------ |
+| 长度(个数)        | $MILLISECOND规则      | 长度见\$LENGTH规则 | 长度见\$STRING规则 |
+| 描述              | 最短过期时间,毫秒编码 | LISTPACK长度       | LISTPACK结构       |
+
+图解示例：
+
+```纯文本
+                      19 03 6b 65  79 fb fe b9 4b 95 01 00  |......key...K...|
+00000060  00 1f 1f 00 00 00 03 00  84 6b 65 79 31 05 86 76  |.........key1..v|
+00000070  61 6c 75 65 31 07 f4 fb  fe b9 4b 95 01 00 00 09  |alue1.....K.....|
+00000080  ff                                                |.|
+```
+
+![image-20250228170638443](image/HASH_LISTPACK_EX.png)
+
+```纯文本
+19：表示rdb_type为HASH_LISTPACK_EX
+03：采用$LENGTH编码规则,表示键长度 
+6B  65  79  ：键值'key'
+FB B9 4B 95 01 00 00 02 ：hash里key最短过期时间
+1F：采用$LENGTH编码规则,表示值长度 
+1F  00  00  00  .... FF :见LISTPACK结构解析规则
+LISTPACK结构每三个元素(key, value, ttl )为一组 key为'key1'，value为'value1' ,ttl为'600'
+```
+
+<u>25.对象类型-HASH_METADATA</u>
+
+类型描述：
+
+用于存储redis中HASH字段过期数据。需在redis.conf设置 hash-max-listpack-entries 500  -> hash-max-listpack-entries 1 。 这样listpack个数从默认值500设置成1,就不会触发HASH_LISTPACK_EX，而会触发HASH_METADATA。
+
+结构图表：
+
+| HASH_METADATA | ttl                   | len                | content            |
+| ------------- | --------------------- | ------------------ | ------------------ |
+| 长度(个数)    | $MILLISECOND规则      | 长度见\$LENGTH规则 | 长度见\$STRING规则 |
+| 描述          | 最短过期时间,毫秒编码 | 元素个数           | 元素               |
+
+content中过期时间规则图表：
+
+| 过期时间        | 占用字节数 | 值描述                      |
+| --------------- | ---------- | --------------------------- |
+| 00              | 1          | 代表没有过期时间            |
+| 01              | 1          | 取最短过期时间ttl           |
+| $length编码规则 | 4          | 小端格式转化成时间 单位是ms |
+| $length编码规则 | 8          | 小端格式转化成时间 单位是ms |
+
+图解示例：
+
+```纯文本
+                      18 04 75 73  65 72 26 c8 f7 4b 95 01  |......user&..K..|
+00000060  00 00 03 80 00 02 96 3c  02 6b 32 02 76 32 01 02  |.......<.k2.v2..|
+00000070  6b 31 02 76 31 00 02 6b  33 02 76 33 ff           |k1.v1..k3.v3.|                                             |.|
+```
+
+![image-20250303103845317](image/HASH_METADATA.png)
+
+```纯文本
+18：表示rdb_type为HASH_METADATA
+04：采用$LENGTH编码规则,表示键长度 
+75  73  65 72：键值'user'
+26 c8 f7 4b 95 01 00 00 ：hash里key最短过期时间
+03：代表hash元素格式(ttl,key,value一组为一个元素)
+80: 长度编码，后四个字节代表过期时间
+00 02 96 3c：过期时间
+02: 采用$LENGTH编码规则,表示字段长度
+6b 32：k2
+02: 采用$LENGTH编码规则,表示值长度
+76 32: v2
+01: 过期时间规则图表，01取hash里key最短过期时间
+02: 采用$LENGTH编码规则,表示字段长度
+6b 31：k1
+02: 采用$LENGTH编码规则,表示值长度
+76 31: v1
+00: 过期时间规则图表，01表示没有过期时间
+```
+
+<u>26.对象类型-STREAM\_LISTPACKS</u>
 
 详见STREAM\_LISTPACKS\_3(15)
 
 差异见<aux结构图表><groups结构图表>
 
-<u>25.对象类型-STREAM\_LISTPACKS\_2</u>
+<u>27.对象类型-STREAM\_LISTPACKS\_2</u>
 
 详见STREAM\_LISTPACKS\_3(15)
 
 差异见<aux结构图表><groups结构图表>
 
-<u>26.对象类型-STREAM\_LISTPACKS\_3</u>
+<u>28.对象类型-STREAM\_LISTPACKS\_3</u>
 
 类型描述：
 
@@ -1367,7 +1453,7 @@ ff  ff  ff ff  ff  ff ff ff：采用$millisecond编码规则activeTime（3版本
 [密钥相关内容，密钥数量为0时，不存在]
 ```
 
-<u>27.对象类型-MODULE</u>
+<u>29.对象类型-MODULE</u>
 
 类型描述：
 
@@ -1417,7 +1503,7 @@ moduleId结构图表：
 最后10位：0000000000 &1023 ，得到moduleVersion是0
 ```
 
-<u>28.对象类型-MODULE\_2</u>
+<u>30.对象类型-MODULE\_2</u>
 
 类型描述：
 
